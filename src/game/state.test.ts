@@ -25,6 +25,8 @@ function makeState(): GameState {
     finishedOrder: [],
     firstMoveDone: false,
     revealedSpades: { A: false, "3": false },
+    lastMoves: { p1: null, p2: null, p3: null, p4: null },
+    lastMoveSeq: 0,
   };
 }
 
@@ -64,4 +66,3 @@ describe("A3 state", () => {
     expect(s.turnIndex).toBe(0);
   });
 });
-

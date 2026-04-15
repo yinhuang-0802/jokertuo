@@ -31,7 +31,18 @@ export default function Seat({
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <div className={cn("h-9 w-9 rounded-full ring-1", active ? "bg-sky-500/20 ring-sky-400/50" : "bg-white/5 ring-white/10")} />
+            <div className={cn("relative h-9 w-9 rounded-full ring-1", active ? "bg-sky-500/20 ring-sky-400/50" : "bg-white/5 ring-white/10")}>
+              {player.revealed.spadeA ? (
+                <div className="absolute -top-2 -left-2 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[11px] font-black text-zinc-950 ring-1 ring-white/50">
+                  A
+                </div>
+              ) : null}
+              {player.revealed.spade3 ? (
+                <div className="absolute -top-2 left-3 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[11px] font-black text-zinc-950 ring-1 ring-white/50">
+                  3
+                </div>
+              ) : null}
+            </div>
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold">{player.name}</div>
               {variant === "full" ? (
@@ -53,14 +64,9 @@ export default function Seat({
         </div>
       </div>
 
-      {variant === "full" ? (
-        <div className="mt-2 hidden items-center gap-2 text-xs sm:flex">
-          <div className={cn("rounded-md px-2 py-0.5 ring-1", player.revealed.spadeA ? "bg-white/10 text-white ring-white/10" : "bg-white/5 text-white/40 ring-white/10")}>
-            {player.revealed.spadeA ? "A♠" : "?"}
-          </div>
-          <div className={cn("rounded-md px-2 py-0.5 ring-1", player.revealed.spade3 ? "bg-white/10 text-white ring-white/10" : "bg-white/5 text-white/40 ring-white/10")}>
-            {player.revealed.spade3 ? "3♠" : "?"}
-          </div>
+      {variant === "full" && (player.revealed.spadeA || player.revealed.spade3) ? (
+        <div className="mt-2 flex items-center gap-2 text-xs text-white/70">
+          <span>已亮牌</span>
         </div>
       ) : null}
     </div>

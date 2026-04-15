@@ -37,7 +37,7 @@ export default function TopStatusBar({
         </div>
       </div>
 
-      <div className="min-w-0 flex-1 text-center">
+      <div className="min-w-0 flex-1 text-center hidden sm:block">
         <div className="truncate text-2xl font-black text-white">{titleFor(game)}</div>
         <div className="mt-1 truncate text-xs font-semibold text-white/70">{sublineFor(game)}</div>
       </div>
@@ -61,4 +61,3 @@ export default function TopStatusBar({
     </div>
   );
 }
-

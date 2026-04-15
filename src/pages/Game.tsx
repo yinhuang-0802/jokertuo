@@ -5,14 +5,13 @@ import { aiThinkDelayMs, chooseAiAction } from "@/game/ai";
 import { useGameStore } from "@/store/gameStore";
 import ToastBar from "@/components/game/ToastBar";
 import Seat from "@/components/game/Seat";
-import CenterPile from "@/components/game/CenterPile";
-import SeatPilesLayer from "@/components/game/SeatPilesLayer";
 import HandArea from "@/components/game/HandArea";
 import ActionDock from "@/components/game/ActionDock";
 import { useTurnCountdown } from "@/hooks/useTurnCountdown";
 import { playerIndexForSeat } from "@/game/ui";
 import PlayAnimLayer from "@/components/game/PlayAnimLayer";
 import TopStatusBar from "@/components/game/TopStatusBar";
+import SeatMoveBubble from "@/components/game/SeatMoveBubble";
 import type { Card } from "@/game/types";
 import { supabase } from "@/lib/supabase";
 import { getOrCreatePlayerId } from "@/lib/playerIdentity";
@@ -411,7 +410,6 @@ export default function Game() {
           <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-b from-[#0E1A2F] to-[#07101E] p-2 ring-1 ring-white/10 sm:p-4">
             <div className="pointer-events-none absolute inset-0 opacity-70" style={{ background: "radial-gradient(60% 55% at 50% 45%, rgba(255,255,255,0.10), rgba(0,0,0,0) 70%)" }} />
             <PlayAnimLayer playAnim={anim.play} />
-            <SeatPilesLayer game={game} baseIndex={ui.humanViewIndex} />
 
             <div className="relative z-0 grid grid-cols-12 gap-4">
               <div className="col-span-3 flex items-center">
@@ -423,6 +421,7 @@ export default function Game() {
                     active={game.turnIndex === seatIndices.left}
                     timer={timerFor(seatIndices.left)}
                   />
+                  <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.left]!.id]} side="right" />
                 </div>
               </div>
 
@@ -435,10 +434,9 @@ export default function Game() {
                     active={game.turnIndex === seatIndices.top}
                     timer={timerFor(seatIndices.top)}
                   />
+                  <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.top]!.id]} side="left" />
                 </div>
-                <div className="relative z-0 h-[180px] w-full sm:h-[260px]">
-                  <CenterPile game={game} />
-                </div>
+                <div className="relative z-0 h-[180px] w-full sm:h-[260px]" />
               </div>
 
               <div className="col-span-3 flex items-center justify-end">
@@ -450,6 +448,7 @@ export default function Game() {
                     active={game.turnIndex === seatIndices.right}
                     timer={timerFor(seatIndices.right)}
                   />
+                  <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.right]!.id]} side="left" />
                 </div>
               </div>
             </div>
@@ -467,6 +466,7 @@ export default function Game() {
           {viewedPlayer ? (
             <div className="grid gap-3 lg:grid-cols-[1fr_260px] lg:items-end">
               <div className="relative pb-28 lg:pb-0">
+                <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.bottom]!.id]} side="above" />
                 <HandArea
                   player={viewedPlayer}
                   game={game}

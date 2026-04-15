@@ -53,6 +53,10 @@ export type Trick = {
   combo: Combo;
 };
 
+export type LastMove =
+  | { kind: "play"; comboType: ComboType; cardIds: string[]; seq: number }
+  | { kind: "pass"; seq: number };
+
 export type GameMode = "solo" | "duo";
 export type AiDifficulty = "easy" | "normal" | "hard";
 
@@ -77,6 +81,8 @@ export type GameState = {
     A: boolean;
     "3": boolean;
   };
+  lastMoves: Record<string, LastMove | null>;
+  lastMoveSeq: number;
 };
 
 export type GameResult =
@@ -95,4 +101,3 @@ export type GameResult =
       soloRank: number;
       soloOutcome: "win" | "lose";
     };
-

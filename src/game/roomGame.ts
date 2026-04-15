@@ -31,6 +31,9 @@ export function createRoomGame(params: {
     difficulty: params.difficulty,
   };
 
+  const lastMoves: Record<string, null> = {};
+  for (const p of players) lastMoves[p.id] = null;
+
   return {
     settings,
     phase: "playing",
@@ -42,6 +45,7 @@ export function createRoomGame(params: {
     finishedOrder: [],
     firstMoveDone: false,
     revealedSpades: { A: false, "3": false },
+    lastMoves,
+    lastMoveSeq: 0,
   };
 }
-

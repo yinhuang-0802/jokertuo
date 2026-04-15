@@ -59,6 +59,9 @@ export function createNewGame(settings: GameSettings, rng: () => number = Math.r
   const starterIndex = players.findIndex((p) => p.hand.some((c) => c.id === DIAMOND_4_ID));
   const start = starterIndex >= 0 ? starterIndex : 0;
 
+  const lastMoves: Record<string, null> = {};
+  for (const p of players) lastMoves[p.id] = null;
+
   return {
     settings,
     phase: "playing",
@@ -70,6 +73,8 @@ export function createNewGame(settings: GameSettings, rng: () => number = Math.r
     finishedOrder: [],
     firstMoveDone: false,
     revealedSpades: { A: false, "3": false },
+    lastMoves,
+    lastMoveSeq: 0,
   };
 }
 
@@ -107,6 +112,14 @@ export function playCards(state: GameState, playerIndex: number, selected: Card[
   state.passCount = 0;
   state.firstMoveDone = true;
 
+  state.lastMoveSeq += 1;
+  state.lastMoves[player.id] = {
+    kind: "play",
+    comboType: check.combo.type,
+    cardIds: selected.map((c) => c.id),
+    seq: state.lastMoveSeq,
+  };
+
   if (selected.some((c) => c.id === SPADE_A_ID)) {
     player.revealed.spadeA = true;
     state.revealedSpades.A = true;
@@ -129,6 +142,10 @@ export function passTurn(state: GameState, playerIndex: number) {
   if (state.phase !== "playing") return { ok: false as const, reason: "对局已结束" };
   if (playerIndex !== state.turnIndex) return { ok: false as const, reason: "未轮到你" };
   if (!state.trick) return { ok: false as const, reason: "当前可自由出牌，不能pass" };
+
+  state.lastMoveSeq += 1;
+  const passer = state.players[playerIndex]!;
+  state.lastMoves[passer.id] = { kind: "pass", seq: state.lastMoveSeq };
 
   state.passCount += 1;
   const remaining = activeCount(state.players);
@@ -195,4 +212,3 @@ export function trickSummary(trick: Trick | null) {
     cardIds: trick.combo.cards.map((c) => c.id),
   };
 }
-
