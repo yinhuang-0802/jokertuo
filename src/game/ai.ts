@@ -131,9 +131,9 @@ function pickMinMaxCard(moves: { cards: Card[]; combo: Combo }[]) {
 
 export function aiThinkDelayMs(difficulty: AiDifficulty, rng: () => number = Math.random) {
   const r = rng();
-  if (difficulty === "easy") return 700 + Math.floor(r * 900);
-  if (difficulty === "normal") return 500 + Math.floor(r * 700);
-  return 300 + Math.floor(r * 500);
+  if (difficulty === "easy") return 1200 + Math.floor(r * 1400);
+  if (difficulty === "normal") return 900 + Math.floor(r * 1100);
+  return 700 + Math.floor(r * 900);
 }
 
 export function chooseAiAction(
