@@ -496,7 +496,7 @@ export default function Game() {
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-transparent" />
             <div className="relative mx-auto w-full max-w-[1200px] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
               <div className="flex items-end gap-3">
-                <div className="hidden w-[240px] shrink-0 sm:block">
+                <div className="w-[170px] shrink-0 sm:w-[240px]">
                   <Seat
                     player={game.players[seatIndices.bottom]!}
                     pos="bottom"
