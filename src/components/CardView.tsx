@@ -44,7 +44,7 @@ export default function CardView({
           : undefined
       }
       className={cn(
-        "group relative flex h-24 w-16 touch-manipulation flex-col justify-between rounded-xl bg-white px-2 py-2 text-left text-zinc-950 ring-1 transition will-change-transform",
+        "group relative flex h-20 w-14 touch-manipulation flex-col justify-between rounded-xl bg-white px-2 py-2 text-left text-zinc-950 ring-1 transition will-change-transform sm:h-24 sm:w-16",
         appearDelayMs !== undefined ? "a3-deal" : "",
         disabled ? "opacity-60" : "hover:-translate-y-1 hover:shadow-md",
         selected ? "-translate-y-2 ring-amber-400 shadow-md" : "ring-zinc-200",
@@ -55,7 +55,7 @@ export default function CardView({
         <span>{suitText(card.suit)}</span>
       </div>
       <div className="flex flex-1 items-center justify-center">
-        <div className={cn("text-2xl font-black", suitColor(card.suit))}>{card.rank}</div>
+        <div className={cn("text-xl font-black sm:text-2xl", suitColor(card.suit))}>{card.rank}</div>
       </div>
       <div className={cn("absolute bottom-2 right-2 flex items-center gap-0.5 text-xs font-extrabold", suitColor(card.suit))}>
         <span>{card.rank}</span>

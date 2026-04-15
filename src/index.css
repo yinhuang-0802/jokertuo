@@ -13,6 +13,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 @layer utilities {
   .a3-tabular {
     font-variant-numeric: tabular-nums;

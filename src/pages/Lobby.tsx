@@ -36,6 +36,14 @@ export default function Lobby() {
     return `${modeLabel[mode]} · AI难度：${difficultyLabel[difficulty]}`;
   }, [mode, difficulty]);
 
+  const errMsg = (e: unknown) => {
+    if (!e) return "";
+    if (e instanceof Error) return e.message;
+    if (typeof e === "string") return e;
+    if (typeof e === "object" && "message" in e) return String((e as { message: unknown }).message);
+    return "操作失败";
+  };
+
   return (
     <AppShell>
       <div className="flex items-center justify-between">
@@ -121,7 +129,7 @@ export default function Lobby() {
               const res = await createRoom({ ownerPlayerId: playerId, ownerName: displayName, mode, difficulty });
               setCreating(false);
               if (res.error || !res.data) {
-                setRoomError(res.error?.message ?? "创建失败");
+                setRoomError(errMsg(res.error) || "创建失败");
                 return;
               }
               nav(`/room/${res.data.id}`);

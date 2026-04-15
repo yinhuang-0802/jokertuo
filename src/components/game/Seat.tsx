@@ -7,11 +7,13 @@ export default function Seat({
   active,
   pos,
   timer,
+  variant = "full",
 }: {
   player: Player;
   active: boolean;
   pos: "left" | "top" | "right" | "bottom";
   timer?: { msLeft: number; progress: number };
+  variant?: "full" | "compact";
 }) {
   const frame =
     pos === "bottom"
@@ -32,10 +34,12 @@ export default function Seat({
             <div className={cn("h-9 w-9 rounded-full ring-1", active ? "bg-sky-500/20 ring-sky-400/50" : "bg-white/5 ring-white/10")} />
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold">{player.name}</div>
-              <div className="mt-0.5 flex items-center gap-2 text-xs text-white/70">
-                <span>{player.isHuman ? "真人" : "AI"}</span>
-                {player.finishedRank ? <span>#{player.finishedRank}</span> : null}
-              </div>
+              {variant === "full" ? (
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-white/70">
+                  <span>{player.isHuman ? "真人" : "AI"}</span>
+                  {player.finishedRank ? <span>#{player.finishedRank}</span> : null}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -49,14 +53,16 @@ export default function Seat({
         </div>
       </div>
 
-      <div className="mt-2 flex items-center gap-2 text-xs">
-        <div className={cn("rounded-md px-2 py-0.5 ring-1", player.revealed.spadeA ? "bg-white/10 text-white ring-white/10" : "bg-white/5 text-white/40 ring-white/10")}>
-          {player.revealed.spadeA ? "A♠" : "?"}
+      {variant === "full" ? (
+        <div className="mt-2 hidden items-center gap-2 text-xs sm:flex">
+          <div className={cn("rounded-md px-2 py-0.5 ring-1", player.revealed.spadeA ? "bg-white/10 text-white ring-white/10" : "bg-white/5 text-white/40 ring-white/10")}>
+            {player.revealed.spadeA ? "A♠" : "?"}
+          </div>
+          <div className={cn("rounded-md px-2 py-0.5 ring-1", player.revealed.spade3 ? "bg-white/10 text-white ring-white/10" : "bg-white/5 text-white/40 ring-white/10")}>
+            {player.revealed.spade3 ? "3♠" : "?"}
+          </div>
         </div>
-        <div className={cn("rounded-md px-2 py-0.5 ring-1", player.revealed.spade3 ? "bg-white/10 text-white ring-white/10" : "bg-white/5 text-white/40 ring-white/10")}>
-          {player.revealed.spade3 ? "3♠" : "?"}
-        </div>
-      </div>
+      ) : null}
     </div>
   );
 }

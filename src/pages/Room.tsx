@@ -8,6 +8,11 @@ import { cn } from "@/lib/utils";
 import { mulberry32 } from "@/game/rng";
 import { createRoomGame } from "@/game/roomGame";
 
+function coerceDifficulty(value: string | null | undefined): "easy" | "normal" | "hard" {
+  if (value === "easy" || value === "normal" || value === "hard") return value;
+  return "normal";
+}
+
 export default function Room() {
   const nav = useNavigate();
   const { roomId } = useParams();
@@ -161,11 +166,11 @@ export default function Room() {
 
     const gamePlayers = seatPlayers.map((p) => ({ id: p.player_id, name: p.display_name, isAi: p.is_ai }));
     const rng = mulberry32(seed);
-    const game = createRoomGame({ players: gamePlayers, difficulty: (lockRes.data.difficulty as any) ?? "normal", rng });
+    const game = createRoomGame({ players: gamePlayers, difficulty: coerceDifficulty(lockRes.data.difficulty), rng });
 
     const startRes = await supabase
       .from("rooms")
-      .update({ status: "in_game", game_state: game as any, game_version: 1, updated_at: new Date().toISOString() })
+      .update({ status: "in_game", game_state: game as unknown, game_version: 1, updated_at: new Date().toISOString() })
       .eq("id", roomId)
       .select("*")
       .single<RoomRow>();

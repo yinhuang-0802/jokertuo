@@ -18,6 +18,7 @@ import { supabase } from "@/lib/supabase";
 import { getOrCreatePlayerId } from "@/lib/playerIdentity";
 import { getRoomById, listRoomPlayers, type RoomRow } from "@/lib/rooms";
 import { computeResult } from "@/game/state";
+import type { GameState } from "@/game/types";
 
 type LobbyMode = "solo" | "duo";
 type AiDifficulty = "easy" | "normal" | "hard";
@@ -110,7 +111,7 @@ export default function Game() {
       if (!room.game_state) {
         useGameStore.setState({ game: null, result: null, selectedCardIds: [], toast: { id: (useGameStore.getState().toast?.id ?? 0) + 1, tone: "info", message: "等待房主开始对局…" } });
       } else {
-        const nextGame = room.game_state as any;
+        const nextGame = room.game_state as unknown as GameState;
         useGameStore.setState({ game: nextGame, result: nextGame.phase === "finished" ? computeResult(nextGame) : null });
       }
 
@@ -123,7 +124,7 @@ export default function Game() {
           if (typeof next.game_version === "number" && next.game_version <= ref.version) return;
           ref.version = next.game_version ?? ref.version;
           if (next.status === "in_game" && next.game_state) {
-            const g = next.game_state as any;
+            const g = next.game_state as unknown as GameState;
             useGameStore.setState({ game: g, result: g.phase === "finished" ? computeResult(g) : null });
           }
         })
@@ -137,10 +138,10 @@ export default function Game() {
         if (fresh.data.game_version <= ref.version) return;
         ref.version = fresh.data.game_version;
         if (fresh.data.status === "in_game" && fresh.data.game_state) {
-          const g = fresh.data.game_state as any;
+          const g = fresh.data.game_state as unknown as GameState;
           useGameStore.setState({ game: g, result: g.phase === "finished" ? computeResult(g) : null });
         }
-      }, 1500) as any;
+      }, 1500);
     })();
 
     return () => {
@@ -175,7 +176,7 @@ export default function Game() {
             if (!ref || !currentGame) return;
             const update = await supabase
               .from("rooms")
-              .update({ game_state: currentGame as any, game_version: ref.version + 1, updated_at: new Date().toISOString() })
+              .update({ game_state: currentGame as unknown, game_version: ref.version + 1, updated_at: new Date().toISOString() })
               .eq("id", ref.roomId)
               .eq("game_version", ref.version)
               .select("game_version")
@@ -185,7 +186,7 @@ export default function Game() {
               const fresh = await getRoomById(ref.roomId);
               if (fresh.data?.game_state) {
                 ref.version = fresh.data.game_version;
-                const g = fresh.data.game_state as any;
+                const g = fresh.data.game_state as unknown as GameState;
                 useGameStore.setState({ game: g, result: g.phase === "finished" ? computeResult(g) : null });
               }
               return;
@@ -204,7 +205,7 @@ export default function Game() {
             if (!ref || !currentGame) return;
             const update = await supabase
               .from("rooms")
-              .update({ game_state: currentGame as any, game_version: ref.version + 1, updated_at: new Date().toISOString() })
+              .update({ game_state: currentGame as unknown, game_version: ref.version + 1, updated_at: new Date().toISOString() })
               .eq("id", ref.roomId)
               .eq("game_version", ref.version)
               .select("game_version")
@@ -214,7 +215,7 @@ export default function Game() {
               const fresh = await getRoomById(ref.roomId);
               if (fresh.data?.game_state) {
                 ref.version = fresh.data.game_version;
-                const g = fresh.data.game_state as any;
+                const g = fresh.data.game_state as unknown as GameState;
                 useGameStore.setState({ game: g, result: g.phase === "finished" ? computeResult(g) : null });
               }
               return;
@@ -296,7 +297,7 @@ export default function Game() {
           if (!ref || !currentGame) return;
           const update = await supabase
             .from("rooms")
-            .update({ game_state: currentGame as any, game_version: ref.version + 1, updated_at: new Date().toISOString() })
+            .update({ game_state: currentGame as unknown, game_version: ref.version + 1, updated_at: new Date().toISOString() })
             .eq("id", ref.roomId)
             .eq("game_version", ref.version)
             .select("game_version")
@@ -316,7 +317,7 @@ export default function Game() {
           if (!ref || !currentGame) return;
           const update = await supabase
             .from("rooms")
-            .update({ game_state: currentGame as any, game_version: ref.version + 1, updated_at: new Date().toISOString() })
+            .update({ game_state: currentGame as unknown, game_version: ref.version + 1, updated_at: new Date().toISOString() })
             .eq("id", ref.roomId)
             .eq("game_version", ref.version)
             .select("game_version")
@@ -348,7 +349,7 @@ export default function Game() {
     if (!roomId || !ref || !currentGame) return;
     const update = await supabase
       .from("rooms")
-      .update({ game_state: currentGame as any, game_version: ref.version + 1, updated_at: new Date().toISOString() })
+      .update({ game_state: currentGame as unknown, game_version: ref.version + 1, updated_at: new Date().toISOString() })
       .eq("id", ref.roomId)
       .eq("game_version", ref.version)
       .select("game_version")
@@ -359,7 +360,7 @@ export default function Game() {
       const fresh = await getRoomById(ref.roomId);
       if (fresh.data?.game_state) {
         ref.version = fresh.data.game_version;
-        const g = fresh.data.game_state as any;
+        const g = fresh.data.game_state as unknown as GameState;
         useGameStore.setState({ game: g, result: g.phase === "finished" ? computeResult(g) : null });
       }
       return;
@@ -406,8 +407,8 @@ export default function Game() {
           <div className="flex items-center justify-end gap-3">{viewSwitch}</div>
         </div>
 
-        <div className="mt-4 grid gap-4">
-          <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-b from-[#0E1A2F] to-[#07101E] p-4 ring-1 ring-white/10">
+        <div className="mt-4 grid gap-3">
+          <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-b from-[#0E1A2F] to-[#07101E] p-2 ring-1 ring-white/10 sm:p-4">
             <div className="pointer-events-none absolute inset-0 opacity-70" style={{ background: "radial-gradient(60% 55% at 50% 45%, rgba(255,255,255,0.10), rgba(0,0,0,0) 70%)" }} />
             <PlayAnimLayer playAnim={anim.play} />
             <SeatPilesLayer game={game} baseIndex={ui.humanViewIndex} />
@@ -418,6 +419,7 @@ export default function Game() {
                   <Seat
                     player={game.players[seatIndices.left]!}
                     pos="left"
+                    variant="compact"
                     active={game.turnIndex === seatIndices.left}
                     timer={timerFor(seatIndices.left)}
                   />
@@ -429,11 +431,12 @@ export default function Game() {
                   <Seat
                     player={game.players[seatIndices.top]!}
                     pos="top"
+                    variant="compact"
                     active={game.turnIndex === seatIndices.top}
                     timer={timerFor(seatIndices.top)}
                   />
                 </div>
-                <div className="relative z-0 h-[260px] w-full">
+                <div className="relative z-0 h-[180px] w-full sm:h-[260px]">
                   <CenterPile game={game} />
                 </div>
               </div>
@@ -443,6 +446,7 @@ export default function Game() {
                   <Seat
                     player={game.players[seatIndices.right]!}
                     pos="right"
+                    variant="compact"
                     active={game.turnIndex === seatIndices.right}
                     timer={timerFor(seatIndices.right)}
                   />
@@ -451,7 +455,7 @@ export default function Game() {
             </div>
           </div>
 
-          <div className="flex justify-center">
+          <div className="hidden justify-center sm:flex">
             <Seat
               player={game.players[seatIndices.bottom]!}
               pos="bottom"
@@ -462,7 +466,7 @@ export default function Game() {
 
           {viewedPlayer ? (
             <div className="grid gap-3 lg:grid-cols-[1fr_260px] lg:items-end">
-              <div className="relative">
+              <div className="relative pb-28 lg:pb-0">
                 <HandArea
                   player={viewedPlayer}
                   game={game}
@@ -500,7 +504,7 @@ export default function Game() {
               </div>
 
               <ActionDock
-                className="lg:sticky lg:bottom-4"
+                className="fixed bottom-2 left-4 right-4 z-40 lg:sticky lg:bottom-4 lg:left-auto lg:right-auto"
                 canPlay={canPlay.ok}
                 canPass={canPass}
                 disabledReason={disabledReason}

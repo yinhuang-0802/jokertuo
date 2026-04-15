@@ -58,7 +58,7 @@ export async function createRoom(params: {
   ownerName: string;
   mode: "solo" | "duo";
   difficulty: "easy" | "normal" | "hard";
-}) {
+}): Promise<{ data: RoomRow | null; error: unknown | null }> {
   for (let attempt = 0; attempt < 5; attempt++) {
     const inviteCode = randomInviteCode(6);
     const insertRoom = await supabase
@@ -74,8 +74,8 @@ export async function createRoom(params: {
       .single<RoomRow>();
 
     if (insertRoom.error) {
-      if ((insertRoom.error as any).code === "23505") continue;
-      return insertRoom;
+      if (insertRoom.error.code === "23505") continue;
+      return { data: null, error: insertRoom.error };
     }
 
     const room = insertRoom.data;
@@ -87,12 +87,12 @@ export async function createRoom(params: {
       is_ai: false,
       seat_index: 0,
     });
-    if (join.error) return { data: room, error: join.error } as any;
+    if (join.error) return { data: room, error: join.error };
 
-    return insertRoom;
+    return { data: room, error: null };
   }
 
-  return { data: null, error: new Error("invite_code collision") } as any;
+  return { data: null, error: new Error("invite_code collision") };
 }
 
 export async function joinRoomById(params: { roomId: string; playerId: string; displayName: string }) {
@@ -128,4 +128,3 @@ export async function joinRoomById(params: { roomId: string; playerId: string; d
   const nextPlayers = await listRoomPlayers(room.id);
   return { room, players: nextPlayers.data ?? players, error: nextPlayers.error };
 }
-

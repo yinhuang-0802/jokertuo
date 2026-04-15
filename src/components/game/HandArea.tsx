@@ -45,7 +45,7 @@ export default function HandArea({
 
   return (
     <div
-      className="rounded-3xl bg-[#111B2E]/80 p-4 ring-1 ring-white/10"
+      className="rounded-3xl bg-[#111B2E]/80 p-3 ring-1 ring-white/10 sm:p-4"
       onPointerUp={() => {
         downRef.current = false;
         if (drag) {
