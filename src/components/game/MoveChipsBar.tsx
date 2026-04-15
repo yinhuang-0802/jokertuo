@@ -23,8 +23,8 @@ export default function MoveChipsBar({
   if (!groups.some((g) => g.moves.length > 0)) return null;
 
   return (
-    <div className="mt-3 overflow-x-auto pb-2">
-      <div className="flex w-max items-center gap-2 pr-6">
+    <div className="overflow-x-auto pb-2">
+      <div className="flex w-max items-center gap-2 px-4">
         {groups.map((g) => {
           const type = g.type as ComboTypeKey;
           const moves = g.moves;
@@ -43,10 +43,10 @@ export default function MoveChipsBar({
                 onPick(pick.map((c) => c.id));
               }}
               className={cn(
-                "whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-extrabold ring-1 transition",
+                "whitespace-nowrap rounded-xl px-4 py-2 text-sm font-extrabold ring-1 transition",
                 usable && !disabled
-                  ? "bg-white/5 text-white ring-white/10 hover:bg-white/10"
-                  : "bg-white/5 text-white/30 ring-white/5",
+                  ? "bg-[#0B2441]/70 text-white ring-sky-400/25 hover:bg-[#0B2441]/85"
+                  : "bg-[#0B2441]/40 text-white/30 ring-white/10",
               )}
             >
               {comboLabel(g.type)}
@@ -58,4 +58,3 @@ export default function MoveChipsBar({
     </div>
   );
 }
-

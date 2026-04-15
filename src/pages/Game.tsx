@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import AppShell from "@/components/AppShell";
 import { aiThinkDelayMs, chooseAiAction } from "@/game/ai";
@@ -6,12 +6,13 @@ import { useGameStore } from "@/store/gameStore";
 import ToastBar from "@/components/game/ToastBar";
 import Seat from "@/components/game/Seat";
 import HandArea from "@/components/game/HandArea";
-import ActionDock from "@/components/game/ActionDock";
+import MoveChipsBar from "@/components/game/MoveChipsBar";
 import { useTurnCountdown } from "@/hooks/useTurnCountdown";
 import { playerIndexForSeat } from "@/game/ui";
 import PlayAnimLayer from "@/components/game/PlayAnimLayer";
 import SeatMoveBubble from "@/components/game/SeatMoveBubble";
 import type { Card } from "@/game/types";
+import { BookOpen, Lock, Sparkles, Unlock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getOrCreatePlayerId } from "@/lib/playerIdentity";
 import { getRoomById, listRoomPlayers, type RoomRow } from "@/lib/rooms";
@@ -48,6 +49,7 @@ export default function Game() {
 
   const aiTimer = useRef<number | null>(null);
   const roomRef = useRef<{ roomId: string; playerId: string; seatIndex: number; isHost: boolean; version: number } | null>(null);
+  const [handLocked, setHandLocked] = useState(false);
 
   useEffect(() => {
     if (!toast) return;
@@ -328,8 +330,10 @@ export default function Game() {
 
   if (!game) {
     return (
-      <AppShell>
-        <div className="rounded-2xl bg-[#111B2E]/80 p-4 ring-1 ring-white/10">正在创建对局…</div>
+      <AppShell variant="full" className="bg-[#120F0B]">
+        <div className="mx-auto w-full max-w-[1200px] px-4 py-6">
+          <div className="rounded-2xl bg-[#0B2441]/55 p-4 ring-1 ring-sky-400/20">正在创建对局…</div>
+        </div>
       </AppShell>
     );
   }
@@ -396,126 +400,208 @@ export default function Game() {
   ) : null;
 
   return (
-    <AppShell>
-      <div className="relative">
+    <AppShell variant="full" className="bg-[#120F0B]">
+      <div className="relative min-h-dvh overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(1200px 600px at 50% 30%, rgba(255,255,255,0.08), rgba(0,0,0,0) 70%), radial-gradient(900px 480px at 20% 80%, rgba(255,255,255,0.05), rgba(0,0,0,0) 70%)",
+          }}
+        />
         <ToastBar toast={toast} />
 
-        <div className="mt-4 grid gap-3">
-          <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-b from-[#0E1A2F] to-[#07101E] p-2 ring-1 ring-white/10 sm:p-4">
-            <div className="pointer-events-none absolute inset-0 opacity-70" style={{ background: "radial-gradient(60% 55% at 50% 45%, rgba(255,255,255,0.10), rgba(0,0,0,0) 70%)" }} />
-            <PlayAnimLayer playAnim={anim.play} />
+        <div className="mx-auto w-full max-w-[1200px] px-3 pt-3 pb-[320px]">
+          <div className="relative">
+            <div
+              className="rounded-[44px] p-3 shadow-2xl"
+              style={{
+                background:
+                  "linear-gradient(135deg, #6B4A2D 0%, #3E2716 20%, #8B5E34 55%, #2C1A10 100%)",
+              }}
+            >
+              <div
+                className="relative overflow-hidden rounded-[36px] ring-1 ring-black/40"
+                style={{
+                  background:
+                    "radial-gradient(900px 420px at 50% 35%, rgba(255,255,255,0.14), rgba(0,0,0,0) 70%), radial-gradient(900px 520px at 50% 120%, rgba(0,0,0,0.42), rgba(0,0,0,0) 70%), linear-gradient(180deg, #2F8C61 0%, #1E6F4B 100%)",
+                }}
+              >
+                <div className="pointer-events-none absolute inset-0 opacity-25" style={{ background: "radial-gradient(50% 45% at 50% 45%, rgba(255,255,255,0.12), rgba(0,0,0,0) 70%)" }} />
+                <PlayAnimLayer playAnim={anim.play} />
 
-            <div className="relative z-0 grid grid-cols-12 gap-4">
-              <div className="col-span-3 flex items-center">
-                <div className="relative z-20">
-                  <Seat
-                    player={game.players[seatIndices.left]!}
-                    pos="left"
-                    variant="compact"
-                    active={game.turnIndex === seatIndices.left}
-                    timer={timerFor(seatIndices.left)}
-                  />
-                  <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.left]!.id]} side="right" />
-                </div>
-              </div>
-
-              <div className="col-span-6 flex flex-col items-center gap-4">
-                <div className="relative z-20">
-                  <Seat
-                    player={game.players[seatIndices.top]!}
-                    pos="top"
-                    variant="compact"
-                    active={game.turnIndex === seatIndices.top}
-                    timer={timerFor(seatIndices.top)}
-                  />
-                  <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.top]!.id]} side="left" />
-                </div>
-                <div className="relative z-0 h-[180px] w-full sm:h-[260px]" />
-              </div>
-
-              <div className="col-span-3 flex items-center justify-end">
-                <div className="relative z-20">
-                  <Seat
-                    player={game.players[seatIndices.right]!}
-                    pos="right"
-                    variant="compact"
-                    active={game.turnIndex === seatIndices.right}
-                    timer={timerFor(seatIndices.right)}
-                  />
-                  <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.right]!.id]} side="left" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden justify-center sm:flex">
-            <Seat
-              player={game.players[seatIndices.bottom]!}
-              pos="bottom"
-              active={game.turnIndex === seatIndices.bottom}
-              timer={timerFor(seatIndices.bottom)}
-            />
-          </div>
-
-          {viewedPlayer ? (
-            <div className="grid gap-3 lg:grid-cols-[1fr_260px] lg:items-end">
-              <div className="relative pb-28 lg:pb-0">
-                <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.bottom]!.id]} side="above" />
-                <HandArea
-                  player={viewedPlayer}
-                  game={game}
-                  playerIndex={ui.humanViewIndex}
-                  dealId={anim.dealId}
-                  selectedCardIds={selectedCardIds}
-                  disabled={!viewedPlayer.isHuman || duoNeedSwitch}
-                  onToggle={toggleCard}
-                  onSetSelection={setSelectedCardIds}
-                  onClear={clearSelection}
-                  headerRight={
-                    viewedPlayer.isHuman ? (
-                      <div className="flex items-center gap-3">
-                        <div className="text-xs text-white/70">轮到：{game.players[game.turnIndex]!.name}</div>
-                        {viewSwitch}
-                      </div>
-                    ) : null
-                  }
-                />
-
-                {duoNeedSwitch ? (
-                  <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/70 p-6">
-                    <div className="w-full max-w-sm rounded-3xl bg-[#111B2E] p-4 ring-1 ring-white/10">
-                      <div className="text-sm font-extrabold text-white">请交给 {game.players[game.turnIndex]!.name}</div>
-                      <div className="mt-1 text-xs text-white/70">为保证同设备双人不偷看，当前手牌已遮罩。</div>
-                      <button
-                        type="button"
-                        onClick={() => setHumanViewIndex(game.turnIndex)}
-                        className="mt-4 w-full rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-zinc-950 hover:bg-amber-400"
-                      >
-                        我已切换到正确玩家
-                      </button>
+                <div className="relative h-[min(62vh,560px)] w-full">
+                  <div className="absolute left-4 top-1/2 z-20 -translate-y-1/2">
+                    <div className="relative">
+                      <Seat
+                        player={game.players[seatIndices.left]!}
+                        pos="left"
+                        variant="compact"
+                        active={game.turnIndex === seatIndices.left}
+                        timer={timerFor(seatIndices.left)}
+                      />
+                      <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.left]!.id]} side="right" />
                     </div>
                   </div>
-                ) : null}
+
+                  <div className="absolute right-4 top-1/2 z-20 -translate-y-1/2">
+                    <div className="relative">
+                      <Seat
+                        player={game.players[seatIndices.right]!}
+                        pos="right"
+                        variant="compact"
+                        active={game.turnIndex === seatIndices.right}
+                        timer={timerFor(seatIndices.right)}
+                      />
+                      <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.right]!.id]} side="left" />
+                    </div>
+                  </div>
+
+                  <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2">
+                    <div className="relative">
+                      <Seat
+                        player={game.players[seatIndices.top]!}
+                        pos="top"
+                        variant="compact"
+                        active={game.turnIndex === seatIndices.top}
+                        timer={timerFor(seatIndices.top)}
+                      />
+                      <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.top]!.id]} side="left" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={!canPass}
+              onClick={() => {
+                useGameStore.getState().pass();
+                void syncRoomGame();
+              }}
+              className={
+                "absolute right-2 top-1/2 z-30 -translate-y-1/2 rounded-3xl px-5 py-4 text-lg font-black tracking-wider ring-1 transition " +
+                (canPass ? "bg-[#0B2441]/70 text-white ring-sky-400/25 hover:bg-[#0B2441]/85" : "bg-[#0B2441]/40 text-white/30 ring-white/10")
+              }
+              style={{ writingMode: "vertical-rl", textOrientation: "upright" }}
+            >
+              不出
+            </button>
+          </div>
+        </div>
+
+        {viewedPlayer ? (
+          <div className="fixed inset-x-0 bottom-0 z-40">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-transparent" />
+            <div className="relative mx-auto w-full max-w-[1200px] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+              <div className="flex items-end gap-3">
+                <div className="hidden w-[240px] shrink-0 sm:block">
+                  <Seat
+                    player={game.players[seatIndices.bottom]!}
+                    pos="bottom"
+                    variant="compact"
+                    active={game.turnIndex === seatIndices.bottom}
+                    timer={timerFor(seatIndices.bottom)}
+                  />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="mx-auto w-full max-w-[860px]">
+                    <SeatMoveBubble move={game.lastMoves[game.players[seatIndices.bottom]!.id]} side="above" />
+                    <div className="relative">
+                      <HandArea
+                        player={viewedPlayer}
+                        game={game}
+                        playerIndex={ui.humanViewIndex}
+                        dealId={anim.dealId}
+                        selectedCardIds={selectedCardIds}
+                        disabled={!viewedPlayer.isHuman || duoNeedSwitch || handLocked}
+                        onToggle={toggleCard}
+                        onSetSelection={setSelectedCardIds}
+                        onClear={clearSelection}
+                        variant="table"
+                        showHeader={false}
+                        showChips={false}
+                      />
+
+                      <div className="mt-2 flex items-center gap-3">
+                        <div className="min-w-0 flex-1">
+                          <MoveChipsBar
+                            game={game}
+                            playerIndex={ui.humanViewIndex}
+                            disabled={!viewedPlayer.isHuman || duoNeedSwitch || handLocked}
+                            onPick={(ids) => setSelectedCardIds(ids)}
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {viewSwitch}
+                          <button
+                            type="button"
+                            onClick={() => setHandLocked((s) => !s)}
+                            className="inline-flex items-center gap-2 rounded-2xl bg-[#0B2441]/70 px-4 py-2 text-sm font-extrabold text-white ring-1 ring-sky-400/20 hover:bg-[#0B2441]/85"
+                          >
+                            {handLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                            锁牌
+                          </button>
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-2 rounded-2xl bg-[#0B2441]/70 px-4 py-2 text-sm font-extrabold text-white ring-1 ring-sky-400/20 hover:bg-[#0B2441]/85"
+                          >
+                            <BookOpen className="h-4 w-4" />
+                            记牌器
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => hint()}
+                            className="inline-flex items-center gap-2 rounded-2xl bg-[#0B2441]/70 px-4 py-2 text-sm font-extrabold text-white ring-1 ring-sky-400/20 hover:bg-[#0B2441]/85"
+                          >
+                            <Sparkles className="h-4 w-4" />
+                            提示
+                          </button>
+                          <button
+                            type="button"
+                            disabled={!canPlay.ok}
+                            onClick={() => {
+                              useGameStore.getState().playSelected();
+                              void syncRoomGame();
+                            }}
+                            className={
+                              "rounded-2xl px-6 py-2.5 text-sm font-black ring-1 transition " +
+                              (canPlay.ok ? "bg-amber-500 text-zinc-950 ring-amber-300/40 hover:bg-amber-400" : "bg-white/10 text-white/35 ring-white/10")
+                            }
+                          >
+                            出牌
+                          </button>
+                        </div>
+                      </div>
+
+                      {duoNeedSwitch ? (
+                        <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/70 p-6">
+                          <div className="w-full max-w-sm rounded-3xl bg-[#0B2441]/90 p-4 ring-1 ring-sky-400/20">
+                            <div className="text-sm font-extrabold text-white">请交给 {game.players[game.turnIndex]!.name}</div>
+                            <div className="mt-1 text-xs text-white/70">为保证同设备双人不偷看，当前手牌已遮罩。</div>
+                            <button
+                              type="button"
+                              onClick={() => setHumanViewIndex(game.turnIndex)}
+                              className="mt-4 w-full rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-zinc-950 hover:bg-amber-400"
+                            >
+                              我已切换到正确玩家
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="hidden w-[240px] shrink-0 sm:block" />
               </div>
 
-              <ActionDock
-                className="fixed bottom-2 left-4 right-4 z-40 lg:sticky lg:bottom-4 lg:left-auto lg:right-auto"
-                canPlay={canPlay.ok}
-                canPass={canPass}
-                disabledReason={disabledReason}
-                onPlay={() => {
-                  useGameStore.getState().playSelected();
-                  void syncRoomGame();
-                }}
-                onPass={() => {
-                  useGameStore.getState().pass();
-                  void syncRoomGame();
-                }}
-                onHint={() => hint()}
-              />
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     </AppShell>
   );

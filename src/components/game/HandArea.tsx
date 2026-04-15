@@ -15,6 +15,9 @@ export default function HandArea({
   onSetSelection,
   onClear,
   headerRight,
+  variant = "panel",
+  showHeader = true,
+  showChips = true,
 }: {
   player: Player;
   game: GameState;
@@ -26,6 +29,9 @@ export default function HandArea({
   onSetSelection: (ids: string[]) => void;
   onClear: () => void;
   headerRight?: ReactNode;
+  variant?: "panel" | "table";
+  showHeader?: boolean;
+  showChips?: boolean;
 }) {
   const ids = useMemo(() => new Set(selectedCardIds), [selectedCardIds]);
   const [drag, setDrag] = useState<{ start: number; end: number } | null>(null);
@@ -45,7 +51,11 @@ export default function HandArea({
 
   return (
     <div
-      className="rounded-3xl bg-[#111B2E]/80 p-3 ring-1 ring-white/10 sm:p-4"
+      className={
+        variant === "table"
+          ? "bg-transparent"
+          : "rounded-3xl bg-[#111B2E]/80 p-3 ring-1 ring-white/10 sm:p-4"
+      }
       onPointerUp={() => {
         downRef.current = false;
         if (drag) {
@@ -58,33 +68,37 @@ export default function HandArea({
         setDrag(null);
       }}
     >
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-xs text-white/70">你的手牌</div>
-          <div className="mt-1 text-sm font-semibold text-white">{player.name}</div>
+      {showHeader ? (
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-xs text-white/70">你的手牌</div>
+            <div className="mt-1 text-sm font-semibold text-white">{player.name}</div>
+          </div>
+          <div className="flex items-center gap-3">
+            {headerRight}
+            <button
+              type="button"
+              onClick={onClear}
+              className="rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 ring-1 ring-white/10 hover:bg-white/10"
+            >
+              重选
+            </button>
+            <div className="a3-tabular text-sm font-semibold text-white/80">{player.hand.length} 张</div>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {headerRight}
-          <button
-            type="button"
-            onClick={onClear}
-            className="rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 ring-1 ring-white/10 hover:bg-white/10"
-          >
-            重选
-          </button>
-          <div className="a3-tabular text-sm font-semibold text-white/80">{player.hand.length} 张</div>
-        </div>
-      </div>
+      ) : null}
 
-      <MoveChipsBar
-        game={game}
-        playerIndex={playerIndex}
-        disabled={disabled}
-        onPick={(ids) => onSetSelection(ids)}
-      />
+      {showChips ? (
+        <MoveChipsBar
+          game={game}
+          playerIndex={playerIndex}
+          disabled={disabled}
+          onPick={(ids) => onSetSelection(ids)}
+        />
+      ) : null}
 
-      <div className="mt-3 overflow-x-auto pb-2">
-        <div className="flex w-max items-end pr-8">
+      <div className={variant === "table" ? "overflow-x-auto pb-2" : "mt-3 overflow-x-auto pb-2"}>
+        <div className={variant === "table" ? "mx-auto flex w-max items-end px-4" : "flex w-max items-end pr-8"}>
           {player.hand.map((card: Card, idx: number) => {
           const inDrag = drag ? idx >= Math.min(drag.start, drag.end) && idx <= Math.max(drag.start, drag.end) : false;
           const selected = ids.has(card.id) || inDrag;

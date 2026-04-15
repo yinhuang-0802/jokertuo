@@ -36,12 +36,14 @@ export default function SeatMoveBubble({
 
   return (
     <div className={cn("pointer-events-none", posClass)}>
-      <div className="rounded-2xl bg-black/35 px-3 py-2 text-white ring-1 ring-white/10 backdrop-blur">
-        <div className="text-[11px] font-extrabold text-white/90">{content.title}</div>
+      <div className="rounded-3xl bg-[#0B2441]/55 p-2 ring-1 ring-sky-400/20 backdrop-blur">
+        <div className="inline-flex items-center rounded-2xl bg-black/30 px-3 py-1 text-[12px] font-extrabold text-white/90 ring-1 ring-white/10">
+          {content.title}
+        </div>
         {content.cards.length ? (
-          <div className="mt-1 flex flex-wrap gap-1">
+          <div className="mt-2 flex flex-wrap gap-2">
             {content.cards.slice(0, 5).map((id) => (
-              <div key={id} className="rounded-lg bg-white/10 px-2 py-1 text-[11px] font-semibold text-white">
+              <div key={id} className="rounded-2xl bg-white px-3 py-2 text-[14px] font-black text-zinc-900 shadow-sm">
                 {idToLabel(id)}
               </div>
             ))}
@@ -51,4 +53,3 @@ export default function SeatMoveBubble({
     </div>
   );
 }
-
