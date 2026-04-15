@@ -1,17 +1,5 @@
 import { Menu, MoreHorizontal, Settings } from "lucide-react";
-import { comboLabel } from "@/game/combos";
 import type { GameState } from "@/game/types";
-
-function titleFor(game: GameState) {
-  if (!game.trick) return "自由出牌";
-  return "跟牌";
-}
-
-function sublineFor(game: GameState) {
-  if (!game.trick) return "接风中：可重新出任意牌型";
-  const name = game.players.find((p) => p.id === game.trick!.byPlayerId)?.name ?? game.trick.byPlayerId;
-  return `${name} · ${comboLabel(game.trick.combo.type)} · 连续不要 ${game.passCount}`;
-}
 
 export default function TopStatusBar({
   game,
@@ -31,15 +19,7 @@ export default function TopStatusBar({
         >
           <Menu className="h-5 w-5" />
         </button>
-        <div className="hidden sm:block">
-          <div className="text-xs text-white/60">A3</div>
-          <div className="text-sm font-semibold text-white">出牌中</div>
-        </div>
-      </div>
-
-      <div className="min-w-0 flex-1 text-center hidden sm:block">
-        <div className="truncate text-2xl font-black text-white">{titleFor(game)}</div>
-        <div className="mt-1 truncate text-xs font-semibold text-white/70">{sublineFor(game)}</div>
+        <div className="text-sm font-semibold text-white/80">A3</div>
       </div>
 
       <div className="flex items-center gap-2">

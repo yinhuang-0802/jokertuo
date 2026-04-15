@@ -10,7 +10,6 @@ import ActionDock from "@/components/game/ActionDock";
 import { useTurnCountdown } from "@/hooks/useTurnCountdown";
 import { playerIndexForSeat } from "@/game/ui";
 import PlayAnimLayer from "@/components/game/PlayAnimLayer";
-import TopStatusBar from "@/components/game/TopStatusBar";
 import SeatMoveBubble from "@/components/game/SeatMoveBubble";
 import type { Card } from "@/game/types";
 import { supabase } from "@/lib/supabase";
@@ -401,11 +400,6 @@ export default function Game() {
       <div className="relative">
         <ToastBar toast={toast} />
 
-        <div className="grid gap-2">
-          <TopStatusBar game={game} onBack={() => nav("/")} />
-          <div className="flex items-center justify-end gap-3">{viewSwitch}</div>
-        </div>
-
         <div className="mt-4 grid gap-3">
           <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-b from-[#0E1A2F] to-[#07101E] p-2 ring-1 ring-white/10 sm:p-4">
             <div className="pointer-events-none absolute inset-0 opacity-70" style={{ background: "radial-gradient(60% 55% at 50% 45%, rgba(255,255,255,0.10), rgba(0,0,0,0) 70%)" }} />
@@ -481,6 +475,7 @@ export default function Game() {
                     viewedPlayer.isHuman ? (
                       <div className="flex items-center gap-3">
                         <div className="text-xs text-white/70">轮到：{game.players[game.turnIndex]!.name}</div>
+                        {viewSwitch}
                       </div>
                     ) : null
                   }

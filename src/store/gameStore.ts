@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import type { Card, GameResult, GameSettings, GameState } from "@/game/types";
 import { createNewGame, playCards, passTurn, computeResult, canPlay } from "@/game/state";
-import { comboLabel, detectCombo } from "@/game/combos";
 import { seatForPlayerIndex, type SeatPos } from "@/game/ui";
 import { suggestMove } from "@/game/ai";
 
@@ -66,7 +65,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       selectedCardIds: [],
       ui: { humanViewIndex: 0, lastError: null },
       anim: { ...s.anim, dealId: s.anim.dealId + 1, play: null },
-      toast: { id: (s.toast?.id ?? 0) + 1, tone: "info", message: "发牌中…" },
+      toast: null,
     }));
   },
 
@@ -115,15 +114,13 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
 
     const base = ui.humanViewIndex;
     const from = seatForPlayerIndex(playerIndex, base);
-    const combo = detectCombo(cards);
-    const msg = combo ? `${game.players[playerIndex]!.name}：${comboLabel(combo.type)}` : `${game.players[playerIndex]!.name} 出牌`;
 
     set((s) => ({
       game: { ...game },
       selectedCardIds: playerIndex === ui.humanViewIndex ? [] : s.selectedCardIds,
       ui: { ...s.ui, lastError: null },
       anim: { ...s.anim, play: { id: s.anim.play ? s.anim.play.id + 1 : 1, from, cardIds: cards.map((c) => c.id) } },
-      toast: { id: (s.toast?.id ?? 0) + 1, tone: "info", message: msg },
+      toast: null,
       result: game.phase === "finished" ? computeResult(game) : s.result,
     }));
 
@@ -138,13 +135,11 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       set((s) => ({ ui: { ...s.ui, lastError: res.reason }, toast: { id: (s.toast?.id ?? 0) + 1, tone: "error", message: res.reason } }));
       return { ok: false, reason: res.reason };
     }
-    const name = game.players[playerIndex]!.name;
-    const msg = res.reset ? `接风：${name} 可自由出牌` : `${name} 不要`;
     set((s) => ({
       game: { ...game },
       selectedCardIds: playerIndex === s.ui.humanViewIndex ? [] : s.selectedCardIds,
       ui: { ...s.ui, lastError: null },
-      toast: { id: (s.toast?.id ?? 0) + 1, tone: "info", message: msg },
+      toast: null,
     }));
     return { ok: true, reset: res.reset };
   },
